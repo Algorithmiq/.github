@@ -4,7 +4,7 @@ The following are guidelines and suggestions for contributing to Algorithmiq's r
 
 ## Getting started
 
-Please see our [website](https://github.com/Algorithmiq) for a brief overview of our projects.
+Please see our [GitHub organization page](https://github.com/Algorithmiq) for a brief overview of our projects.
 
 ### Asking Questions
 
