@@ -61,22 +61,19 @@ to be offered under terms of the [choose license]()
 ##### Getting Started
 
 * Make sure you have a [GitHub account](https://github.com/signup/free).
-* [Fork](https://help.github.com/articles/fork-a-repo/) the repository on GitHub.
-* On your local machine,
-  [clone](https://help.github.com/articles/cloning-a-repository/) your fork of
-  the repository.
+* On your local machine, [clone](https://help.github.com/articles/cloning-a-repository/) the repository.
 
 ##### Making Changes
 
-* Add some really awesome code to your local fork.  It's usually a [good
+* Add some really awesome code to your local copy of the repository.  It's usually a [good
   idea](http://blog.jasonmeridth.com/posts/do-not-issue-pull-requests-from-your-master-branch/)
   to make changes on a
   [branch](https://help.github.com/articles/creating-and-deleting-branches-within-your-repository/)
   with the branch name relating to the feature you are going to add.
 * When you are ready for others to examine and comment on your new feature,
-  navigate to your fork on GitHub and open a **Draft** [pull
+  navigate to the repository GitHub page and open a **Draft** [pull
   request](https://help.github.com/articles/using-pull-requests/) (PR). Note that
-  after you launch a PR from one of your fork's branches, all
+  after you launch a PR from one of your branches, all
   subsequent commits to that branch will be added to the open pull request
   automatically.  Each commit added to the PR will be validated for
   mergeability, compilation and test suite compliance; the results of these tests
