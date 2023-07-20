@@ -30,21 +30,21 @@ your change affects other areas of the code, etc.
 Notable points that this PR has either accomplished or will accomplish.
 * **Developer Interest**
 <!--- Changes affecting developers -->
-  - [ ] Feature1
+  - [ ] Change1
 * **User-Facing for Release Notes**
 <!--- Changes affecting users and that should be added in the CHANGELOG -->
-  - [ ] Feature2
+  - [ ] Change2
 
 ## Types of changes
 
-What types of changes does your code introduce? Put an `x` in all the boxes that apply:
+What types of changes does your code introduce? Mark the box that applies:
 
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to change)
+- [ ] Minor fix (changes that don't break API, _e.g._ bugfixes, performance improvements, etc)
+- [ ] New feature (changes that add functionality, but don't break API, _e.g._ implementation of an additional flavor of VQE)
+- [ ] Major change (changes that break API, to fix bugs/performance regressions and/or to add new functionatlity)
 
 ## Questions
 
-Questions to the developers:
+Questions to the reviewers:
 
 - [ ] Question1
