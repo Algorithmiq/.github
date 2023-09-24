@@ -37,7 +37,7 @@ body:
       required: true
 
   - type: textarea
-    id: info
+    id: poetry-info
     attributes:
       label: Poetry set up
       description: |
@@ -49,7 +49,7 @@ body:
       required: true
 
   - type: textarea
-    id: info
+    id: environment-info
     attributes:
       label: Environment info
       description: |
