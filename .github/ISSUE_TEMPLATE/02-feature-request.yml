@@ -1,0 +1,37 @@
+name: Feature request
+description: Suggest an idea for this project.
+labels: enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        * Provide a general summary of the request in the **title**.
+        * Add **labels** to help the developers triage the request.
+
+  - type: checkboxes
+    id: documentation
+    attributes:
+      label: The requested feature cannot be found in the documentation.
+      description: |
+        I read [the Aurora documentation](https://docs.aurora.algorithmiq.fi/) and could not find the solution for my problem there.
+      options:
+        - label: I checked the documentation.
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: New feature to fix a current problem.
+      description: |
+        Is your feature request related to a problem? Provide a clear and concise description of what the problem is.
+    validations:
+      required: false
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Desired solution
+      description: |
+        A clear and concise description of what you want to happen.    
+    validations:
+      required: false

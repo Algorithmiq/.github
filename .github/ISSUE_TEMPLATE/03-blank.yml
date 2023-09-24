@@ -1,0 +1,20 @@
+name: General question
+description: Ask a general question
+labels: question
+body:
+  - type: checkboxes
+    id: documentation
+    attributes:
+      label: Solution to issue cannot be found.
+      options:
+        - label: I checked the documentation.
+          required: true
+        - label: I looked for similar issues.
+          required: true
+        - label: I did a quick internet search.
+          required: true
+
+  - type: textarea
+    id: comment
+    attributes:
+       label: "Comment:"

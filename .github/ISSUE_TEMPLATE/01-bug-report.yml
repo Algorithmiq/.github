@@ -1,0 +1,62 @@
+name: Bug report
+description: Report a bug with this package.
+labels: bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        * Provide a general summary of the issue in the **title**.
+        * Add **labels** to help the developers triage the issue.
+
+  - type: checkboxes
+    id: documentation
+    attributes:
+      label: Solution to issue cannot be found in the documentation.
+      description: |
+        I read [the Aurora documentation](https://docs.aurora.algorithmiq.fi/) and could not find the solution for my problem there.
+      options:
+        - label: I checked the documentation.
+          required: true
+
+  - type: textarea
+    id: issue
+    attributes:
+      label: Describe the issue
+      description: |
+        Please describe the issue you are experiencing:
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: |
+        Provide a link to a live example, or an unambiguous set of steps to reproduce this bug. Include code to reproduce, if relevant.
+    validations:
+      required: true
+
+  - type: textarea
+    id: info
+    attributes:
+      label: Poetry set up
+      description: |
+        Please share your Poetry set up by running `poetry debug info` and entering the output below:
+        _Note:_ This will be automatically formatted as code.
+      placeholder: "poetry debug info"
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: info
+    attributes:
+      label: Environment info
+      description: |
+        Please share your virtual environment information by running `poetry show` and entering the output below:
+        _Note:_ This will be automatically formatted as code.
+      placeholder: "poetry show"
+      render: shell
+    validations:
+      required: true
+      
