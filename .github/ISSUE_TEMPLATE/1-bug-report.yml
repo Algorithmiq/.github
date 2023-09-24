@@ -55,10 +55,12 @@ body:
       description: |
         Please share your virtual environment information by running `poetry show` and entering the output below:
         _Note:_ This will be automatically formatted as code.
-      placeholder: | 
+      placeholder: |
+        Copy-paste the output of the `poetry show` command.
+      value: | 
         <details>
         ```shell
-        poetry show
+        Copy-paste your output here.
         ```
         </details>
     validations:
