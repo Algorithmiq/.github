@@ -55,8 +55,12 @@ body:
       description: |
         Please share your virtual environment information by running `poetry show` and entering the output below:
         _Note:_ This will be automatically formatted as code.
-      placeholder: "poetry show"
-      render: shell
+      placeholder: | 
+        <details>
+        ```shell
+        poetry show
+        ```
+        </details>
     validations:
       required: true
 
