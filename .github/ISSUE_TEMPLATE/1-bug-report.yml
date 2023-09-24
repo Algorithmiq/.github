@@ -59,6 +59,7 @@ body:
         Copy-paste the output of the `poetry show` command.
       value: | 
         <details>
+        
         ```shell
         Copy-paste your output here.
         ```
