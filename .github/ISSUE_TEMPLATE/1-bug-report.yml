@@ -41,7 +41,7 @@ body:
     attributes:
       label: Poetry set up
       description: |
-        Please share your Poetry set up by running `poetry debug info` and entering the output below:
+        Please share your Poetry set up by running `poetry debug info` and entering the output below.
         _Note:_ This will be automatically formatted as code.
       placeholder: "poetry debug info"
       render: shell
@@ -53,15 +53,13 @@ body:
     attributes:
       label: Environment info
       description: |
-        Please share your virtual environment information by running `poetry show` and entering the output below:
+        Please share your virtual environment information by running `poetry show` and entering the output below.
         _Note:_ This will be automatically formatted as code.
-      placeholder: |
-        Copy-paste the output of the `poetry show` command.
       value: | 
         <details>
         
         ```shell
-        Copy-paste your output here.
+        Copy-paste the output of the poetry show command here.
         ```
         </details>
     validations:
