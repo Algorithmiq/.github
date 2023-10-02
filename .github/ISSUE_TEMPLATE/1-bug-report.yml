@@ -35,7 +35,16 @@ body:
         Provide a link to a live example, or an unambiguous set of steps to reproduce this bug. Include code to reproduce, if relevant.
     validations:
       required: true
-
+      
+  - type: textarea
+    id: possible-solution
+    attributes:
+      label: Possible solution(s)
+      description: |
+        Please describe any solution(s) you have considered.
+    validations:
+      required: false
+      
   - type: textarea
     id: poetry-info
     attributes:
@@ -64,6 +73,15 @@ body:
         </details>
     validations:
       required: true
+
+  - type: textarea
+    id: additional-info
+    attributes:
+      label: Additional information
+      description: |
+        Please provide any additional information on the issue that might help reproducing/troubleshooting/fixing it.
+    validations:
+      required: false
 
   - type: checkboxes
     id: terms
