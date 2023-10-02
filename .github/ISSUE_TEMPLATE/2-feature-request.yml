@@ -36,6 +36,15 @@ body:
     validations:
       required: false
 
+  - type: textarea
+    id: additional-info
+    attributes:
+      label: Additional information
+      description: |
+        Please provide any additional information that might help with designing/implementing the feature.
+    validations:
+      required: false
+
   - type: checkboxes
     id: terms
     attributes:
