@@ -22,7 +22,7 @@ Algorithmiq Pull Request template. Please follow the guidelines below.
 your change affects other areas of the code, etc.
 -->
 
-<!-- Add any additional information here, rememmber to remove the comment lines!
+<!-- Add any additional information here, remember to remove the comment lines!
 ## Screenshots
 -->
 
