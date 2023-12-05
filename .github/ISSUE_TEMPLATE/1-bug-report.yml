@@ -44,31 +44,26 @@ body:
         Please describe any solution(s) you have considered.
     validations:
       required: false
-      
-  - type: textarea
-    id: poetry-info
-    attributes:
-      label: Poetry set up
-      description: |
-        Please share your Poetry set up by running `poetry debug info` and entering the output below.
-        _Note:_ This will be automatically formatted as code.
-      placeholder: "poetry debug info"
-      render: shell
-    validations:
-      required: true
 
   - type: textarea
     id: environment-info
     attributes:
       label: Environment info
       description: |
-        Please share your virtual environment information by running `poetry show` and entering the output below.
+        Please share your virtual environment information by running `micromamba list` _and_ `pip list`. Enter the outputs below.
         _Note:_ This will be automatically formatted as code.
       value: | 
         <details>
-        
+        <summary>Micromamba</summary>
         ```shell
-        Copy-paste the output of the poetry show command here.
+        Copy-paste the output of the micromamba list command here.
+        ```
+        </details>
+        
+        <details>
+        <summary>Pip</summary>
+        ```shell
+        Copy-paste the output of the pip list command here.
         ```
         </details>
     validations:
