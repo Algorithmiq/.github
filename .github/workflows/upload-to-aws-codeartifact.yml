@@ -22,8 +22,6 @@ jobs:
   upload_codeartifact:
     name: Upload to AWS CodeArtifact
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
       - uses: actions/download-artifact@v4
