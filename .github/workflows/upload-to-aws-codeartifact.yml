@@ -14,10 +14,6 @@ on:
       aws-secret-access-key:
         required: true
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   upload_codeartifact:
     name: Upload to AWS CodeArtifact
