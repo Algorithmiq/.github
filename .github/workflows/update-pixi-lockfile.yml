@@ -1,0 +1,32 @@
+name: Update Pixi lockfiles
+
+on:
+  workflow_call:
+
+jobs:
+  pixi-update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@v0.8.5
+        with:
+          run-install: false
+      - name: Update lockfiles
+        run: |
+          set -o pipefail
+          pixi update --no-install --json | pixi exec pixi-diff-to-markdown > diff.md
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(lock): :lock: update pixi lockfile"
+          title: "chore(lock): :lock: update pixi lockfile"
+          body-path: diff.md
+          branch: chore-update-pixi
+          base: main
+          labels: pixi
+          delete-branch: true
+          add-paths: pixi.lock
+          # why? see here: https://github.com/peter-evans/create-pull-request/blob/main/docs/concepts-guidelines.md#triggering-further-workflow-runs
+          draft: always-true

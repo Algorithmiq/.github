@@ -1,0 +1,45 @@
+name: Upload to AWS CodeArtifact
+
+on:
+  workflow_call:
+    inputs:
+      aws-region:
+        description: 'AWS region to use'
+        required: false
+        default: 'eu-west-1'
+        type: string
+    secrets:
+      aws-access-key-id:
+        required: true
+      aws-secret-access-key:
+        required: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  upload_codeartifact:
+    name: Upload to AWS CodeArtifact
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    if: github.event_name == 'release' && github.event.action == 'published'
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          # unpacks all CIBW artifacts into dist/
+          pattern: cibw-*
+          path: dist
+          merge-multiple: true
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.aws-access-key-id }}
+          aws-secret-access-key: ${{ secrets.aws-secret-access-key }}
+          aws-region: ${{ inputs.aws-region }}
+      - name: Build and publish
+        run: |
+          export TWINE_USERNAME=aws
+          export TWINE_PASSWORD=`aws codeartifact get-authorization-token --domain algorithmiq --domain-owner 406960181794 --region eu-west-1 --query authorizationToken --output text`
+          export TWINE_REPOSITORY_URL=`aws codeartifact get-repository-endpoint --domain algorithmiq --domain-owner 406960181794 --repository pypi --region eu-west-1 --format pypi --query repositoryEndpoint --output text`
+          pipx run twine upload dist/*
