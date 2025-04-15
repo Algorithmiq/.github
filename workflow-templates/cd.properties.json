@@ -1,7 +1,7 @@
 {
     "name": "Algorithmiq CD Workflow",
     "description": "Algorithmiq CD workflow template.",
-    "iconName": "package-dependents",
+    "iconName": "octicon package-dependents",
     "categories": [
         "Python"
     ],
