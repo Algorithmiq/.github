@@ -1,0 +1,9 @@
+{
+    "name": "Algorithmiq Pixi lockfiles updater",
+    "description": "Algorithmiq Pixi lockfiles updater template.",
+    "iconName": "octicon upload",
+    "filePatterns": [
+        "^pyproject.toml",
+        "^pixi.lock"
+    ]
+}
