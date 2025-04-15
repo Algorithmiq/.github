@@ -1,0 +1,31 @@
+name: Publish Python sdist to Algorithmiq PyPI
+
+on:
+  workflow_dispatch:
+  release:
+    types:
+      - published
+  pull_request:
+    paths:
+      - .github/workflows/cd.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Many color libraries just need this to be set to any value, but at least
+  # one distinguishes color depth, where "3" -> "256-bit color".
+  FORCE_COLOR: 3
+
+jobs:
+  build-sdist:
+    uses: Algorithmiq/.github/.github/workflows/generate-sdist.yml@v1.0.0
+
+  upload_codeartifact:
+    needs:
+      - build-sdist
+    uses: Algorithmiq/.github/.github/workflows/upload-to-aws-codeartifact.yml@v1.0.0
+    secrets:
+      aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

@@ -1,0 +1,11 @@
+{
+    "name": "Algorithmiq CD Workflow",
+    "description": "Algorithmiq CD workflow template.",
+    "iconName": "package-dependents",
+    "categories": [
+        "Python"
+    ],
+    "filePatterns": [
+        "^pyproject.toml"
+    ]
+}
