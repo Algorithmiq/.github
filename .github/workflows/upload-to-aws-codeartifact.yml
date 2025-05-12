@@ -25,14 +25,16 @@ jobs:
           pattern: cibw-*
           path: dist
           merge-multiple: true
+
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.aws-access-key-id }}
           aws-secret-access-key: ${{ secrets.aws-secret-access-key }}
           aws-region: ${{ inputs.aws-region }}
+
       - name: Publish
         run: |
           export TWINE_USERNAME=aws
-          export TWINE_PASSWORD=`aws codeartifact get-authorization-token --domain algorithmiq --domain-owner 406960181794 --region eu-west-1 --query authorizationToken --output text`
-          export TWINE_REPOSITORY_URL=`aws codeartifact get-repository-endpoint --domain algorithmiq --domain-owner 406960181794 --repository pypi --region eu-west-1 --format pypi --query repositoryEndpoint --output text`
+          export TWINE_PASSWORD="$(aws codeartifact get-authorization-token --domain algorithmiq --domain-owner 406960181794 --region ${{ inputs.aws-region }} --query authorizationToken --output text)"
+          export TWINE_REPOSITORY_URL="$(aws codeartifact get-repository-endpoint --domain algorithmiq --domain-owner 406960181794 --repository pypi --region ${{ inputs.aws-region }} --format pypi --query repositoryEndpoint --output text)"
           pipx run twine upload dist/*
