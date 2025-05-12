@@ -1,0 +1,121 @@
+name: Generate obfuscated Python wheels
+
+on:
+  workflow_call:
+    inputs:
+      project-name:
+        description: 'Name of the project'
+        required: true
+        type: string
+      min-pyver:
+        description: 'Minimum Python version (included in range)'
+        required: false
+        default: '3.11'
+        type: string
+      max-pyver:
+        description: 'Maximum Python version (excluded from range)'
+        required: false
+        default: '3.13'
+        type: string
+
+
+jobs:
+  generate-obfuscated-project:
+    name: Generate obfuscated project folder
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install dependencies to run the obfooscator.py script
+        run: |
+          pipx install cyclopts tomli tomli-w
+
+      - name: Generate obfuscated ${{ inputs.project-name }}
+        run: |
+          VERSION="$(pipx run hatch version)"
+          echo "Version as computed by hatch: $VERSION" 
+          python tools/obfooscator.py --fallback-version "$VERSION" --project-name "${{ inputs.project-name }}"
+
+      - name: Upload folder
+        uses: actions/upload-artifact@v4
+        with:
+          name: obfooscated_${{ inputs.project-name }}
+          path: ./obfooscated_${{ inputs.project-name }}
+          retention-days: 1
+
+  build-wheels:
+    name: Build wheels for ${{ matrix.os }}
+    needs:
+      - generate-obfuscated-project
+    runs-on: ${{ matrix.runs-on }}
+    strategy:
+      matrix:
+        os: [ linux-intel, linux-arm, macOS-arm ]
+        include:
+          - archs: native
+            platform: auto
+          - os: linux-intel
+            runs-on: ubuntu-latest
+          - os: linux-arm
+            runs-on: aarch64
+          - os: macos-arm
+            runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate CIBW_BUILD string
+        run: |
+          min_pyver=${{ inputs.min-pyver }}
+          max_pyver=${{ inputs.max-pyver }}
+          # generate the range of Python versions
+          cibw_build=""
+          for version in $(seq ${min_pyver#*.} ${max_pyver#*.}); do
+              cibw_build+="cp3${version}-* "
+          done
+          echo "cibw_build=${cibw_build}" >> $GITHUB_ENV
+
+      # only needed on macOS runners
+      - name: Install uv
+        if: runner.os == 'macos'
+        uses: astral-sh/setup-uv@v6
+
+      - uses: pypa/cibuildwheel@v2.23.3
+        env:
+          # target platform
+          CIBW_PLATFORM: ${{ matrix.platform }}
+          # architectures to build
+          CIBW_ARCHS: ${{ matrix.archs }}
+          # use uv and build
+          CIBW_BUILD_FRONTEND: "build[uv]"
+          # increase pip debugging output
+          CIBW_BUILD_VERBOSITY: 1
+          # set environment variables for macOS builds
+          CIBW_ENVIRONMENT_MACOS: >
+            MACOSX_DEPLOYMENT_TARGET=14.0
+          # Python versions to run builds against
+          CIBW_BUILD: "${{ env.cibw_build }}"
+          # skip musl builds, and PyPy builds
+          CIBW_SKIP: "*-musllinux_* pp*"
+          # disable free-threaded support
+          CIBW_FREE_THREADED_SUPPORT: False
+          # exclude latest Python beta
+          CIBW_PRERELEASE_PYTHONS: False
+          # use abi3audit to catch issues with Limited API wheels
+          CIBW_REPAIR_WHEEL_COMMAND_LINUX: |
+            auditwheel repair -w {dest_dir} {wheel}
+            pipx run abi3audit --strict --report {wheel}
+          CIBW_REPAIR_WHEEL_COMMAND_MACOS: |
+            delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
+            pipx run abi3audit --strict --report {wheel}
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+          path: wheelhouse/*.whl
+
