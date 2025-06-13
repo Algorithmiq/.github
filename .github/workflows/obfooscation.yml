@@ -3,6 +3,11 @@ name: Generate obfuscated Python wheels
 on:
   workflow_call:
     inputs:
+      aws-region:
+        description: 'AWS region to use'
+        required: false
+        default: 'eu-west-1'
+        type: string
       project-name:
         description: 'Name of the project'
         required: true
@@ -15,9 +20,33 @@ on:
       max-pyver:
         description: 'Maximum Python version (excluded from range)'
         required: false
-        default: '3.13'
+        default: '3.14'
         type: string
-
+      ignore-patterns:
+        description: 'List of file or directory patterns to ignore when copying files'
+        required: false
+        default: "['_version.py', '__pycache__', '*.egg-info']"
+        type: string
+      sdist-exclude:
+        description: 'List of file or directory patterns to exclude from the source distribution'
+        required: false
+        default: "['.github', '.devcontainer', '.venv', '.vscode', '.gitignore', '.pre-commit-config.yaml', 'cspell.json']"
+        type: string
+      regex-unobfuscated:
+        description: 'List of regex patterns for files that should not be obfuscated, WITHOUT .py extension!'
+        required: false
+        default: "['__init__', 'main, '[a-zA-Z0-9_]+_numba']"
+        type: string
+      test-command:
+        description: 'Command to run tests within cibuildwheel'
+        required: false
+        default: " pytest {package}/tests -m 'not slow'"
+        type: string
+    secrets:
+      aws-access-key-id:
+        required: true
+      aws-secret-access-key:
+        required: true
 
 jobs:
   generate-obfuscated-project:
@@ -28,21 +57,45 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install dependencies to run the obfooscator.py script
-        run: |
-          pipx install cyclopts tomli tomli-w
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6          
 
-      - name: Generate obfuscated ${{ inputs.project-name }}
+      - name: Authenticate AWS CLI
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.aws-access-key-id }}
+          aws-secret-access-key: ${{ secrets.aws-secret-access-key }}
+          aws-region: ${{ inputs.aws-region }}
+
+      - name: Obtain AWS CodeArtifact token
+        id: set-codeartifact-token
         run: |
-          VERSION="$(pipx run hatch version)"
+          token="$(
+              aws codeartifact get-authorization-token \
+              --domain algorithmiq \
+              --domain-owner 406960181794 \
+              --region eu-west-1 \
+              --query authorizationToken \
+              --output text
+          )"
+          echo "::add-mask::$token"
+          echo "CODEARTIFACT_AUTH_TOKEN=$token" >> "$GITHUB_OUTPUT"
+
+      # TODO we can get min-pyver and max-pyver from the pyproject.toml
+      - name: Generate obfuscated ${{ inputs.project-name }}
+        env:
+          UV_INDEX_ALGO_PYPI_USERNAME: aws
+          UV_INDEX_ALGO_PYPI_PASSWORD: ${{ steps.set-codeartifact-token.outputs.CODEARTIFACT_AUTH_TOKEN }}
+        run: |
+          VERSION="$(uvx --no-progress hatch version)"
           echo "Version as computed by hatch: $VERSION" 
-          python tools/obfooscator.py --fallback-version "$VERSION" --project-name "${{ inputs.project-name }}"
+          uvx --no-progress obfooscator --fallback-version "$VERSION" --root-dir "$PWD" --mirror_dir "obfooscated_project" --min-pyver ${{ inputs.min-pyver }} --ignore-patterns ${{ fromJSON(inputs.ignore-patterns) }} --sdist-exclude ${{ fromJSON(inputs.sdist-exclude) }} --regex-unobfuscated ${{ fromJSON(inputs.regex-unbofuscated) }}
 
       - name: Upload folder
         uses: actions/upload-artifact@v4
         with:
-          name: obfooscated_${{ inputs.project-name }}
-          path: ./obfooscated_${{ inputs.project-name }}
+          name: obfooscated_project
+          path: ./obfooscated_project
           retention-days: 1
 
   build-wheels:
@@ -52,7 +105,7 @@ jobs:
     runs-on: ${{ matrix.runs-on }}
     strategy:
       matrix:
-        os: [ linux-intel, linux-arm, macOS-arm ]
+        os: [ linux-intel, linux-arm ]
         include:
           - archs: native
             platform: auto
@@ -60,8 +113,6 @@ jobs:
             runs-on: ubuntu-latest
           - os: linux-arm
             runs-on: aarch64
-          - os: macos-arm
-            runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -79,11 +130,6 @@ jobs:
           done
           echo "cibw_build=${cibw_build}" >> $GITHUB_ENV
 
-      # only needed on macOS runners
-      - name: Install uv
-        if: runner.os == 'macos'
-        uses: astral-sh/setup-uv@v6
-
       - uses: pypa/cibuildwheel@v2.23.3
         env:
           # target platform
@@ -94,13 +140,12 @@ jobs:
           CIBW_BUILD_FRONTEND: "build[uv]"
           # increase pip debugging output
           CIBW_BUILD_VERBOSITY: 1
-          # set environment variables for macOS builds
-          CIBW_ENVIRONMENT_MACOS: >
-            MACOSX_DEPLOYMENT_TARGET=14.0
+          CIBW_MANYLINUX_X86_64_IMAGE: "manylinux_2_28"
+          CIBW_MANYLINUX_AARCH64_IMAGE: "manylinux_2_28"
           # Python versions to run builds against
           CIBW_BUILD: "${{ env.cibw_build }}"
           # skip musl builds, and PyPy builds
-          CIBW_SKIP: "*-musllinux_* pp*"
+          CIBW_SKIP: "*-musllinux_* pp* *win* *macos*"
           # disable free-threaded support
           CIBW_FREE_THREADED_SUPPORT: False
           # exclude latest Python beta
@@ -111,11 +156,18 @@ jobs:
             pipx run abi3audit --strict --report {wheel}
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: |
             delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
-            pipx run abi3audit --strict --report {wheel}
+            if [[ "{wheel}" == *abi3* ]]; then
+              uvx --no-progress abi3audit --strict --report {wheel}
+            else
+              echo "{wheel} is not abi3, skipping abi3audit"
+            fi
+          CIBW_TEST_COMMAND: ${{ inputs.test-command }}
+          CIBW_TEST_GROUPS: "test"
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
           name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
           path: wheelhouse/*.whl
+          retention-days: 1
 
