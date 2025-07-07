@@ -39,21 +39,11 @@ jobs:
             --region ${{ inputs.aws-region }} \
             --query authorizationToken \
             --output text)
-          REPO_URL=$(aws codeartifact get-repository-endpoint \
-            --domain algorithmiq \
-            --domain-owner 406960181794 \
-            --repository pypi \
-            --region ${{ inputs.aws-region }} \
-            --format pypi \
-            --query repositoryEndpoint \
-            --output text)
           echo "token=$TOKEN" >> $GITHUB_OUTPUT
-          echo "repo-url=$REPO_URL" >> $GITHUB_OUTPUT
 
       - name: Build SDist
         env:
           UV_INDEX_ALGO_PYPI_PASSWORD: ${{ steps.codeartifact.outputs.token }}
-          UV_INDEX_ALGO_PYPI_URL: ${{ steps.codeartifact.outputs.repo-url }}
         run: |
           pipx install uv
           pipx run build --verbose --sdist --installer=uv
