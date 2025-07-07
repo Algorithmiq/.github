@@ -44,6 +44,7 @@ jobs:
 
       - name: Build SDist
         env:
+          UV_INDEX_ALGO_PYPI_USERNAME: aws
           UV_INDEX_ALGO_PYPI_PASSWORD: ${{ steps.codeartifact.outputs.token }}
         run: |
           pipx install uv
