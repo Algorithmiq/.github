@@ -37,6 +37,7 @@ jobs:
             --domain algorithmiq \
             --domain-owner 406960181794 \
             --region ${{ inputs.aws-region }} \
+            --duration-seconds 900 \
             --query authorizationToken \
             --output text)
           echo "token=$TOKEN" >> $GITHUB_OUTPUT
