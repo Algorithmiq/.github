@@ -1,7 +1,19 @@
+---
 name: Generate Python sdist
 
-on:
+"on":
   workflow_call:
+    inputs:
+      aws-region:
+        description: 'AWS region to use'
+        required: false
+        default: 'eu-west-1'
+        type: string
+    secrets:
+      aws-access-key-id:
+        required: true
+      aws-secret-access-key:
+        required: true
 
 jobs:
   build-sdist:
@@ -12,7 +24,28 @@ jobs:
         with:
           fetch-depth: 0  # such that setuptools_scm can do its job correctly
 
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.aws-access-key-id }}
+          aws-secret-access-key: ${{ secrets.aws-secret-access-key }}
+          aws-region: ${{ inputs.aws-region }}
+
+      - name: Get CodeArtifact token
+        id: codeartifact
+        run: |
+          TOKEN=$(aws codeartifact get-authorization-token \
+            --domain algorithmiq \
+            --domain-owner 406960181794 \
+            --region ${{ inputs.aws-region }} \
+            --duration-seconds 900 \
+            --query authorizationToken \
+            --output text)
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
+
       - name: Build SDist
+        env:
+          UV_INDEX_ALGO_PYPI_USERNAME: aws
+          UV_INDEX_ALGO_PYPI_PASSWORD: ${{ steps.codeartifact.outputs.token }}
         run: |
           pipx install uv
           pipx run build --verbose --sdist --installer=uv
